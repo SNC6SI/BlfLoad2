@@ -28,7 +28,6 @@ static LOGG_t logg;
 static VBLObjectHeaderBase Base;
 static VBLObjectHeaderContainer Container;
 static VBLCANMessage message;
-//static VBLCANMessage2 message2;
 static uint8_t needFree = 0;
 static uint8_t peekFlag=1;
 static uint8_t contFlag=0;
@@ -110,8 +109,10 @@ uint8_t blfPeekObject(){
         if(Base.mObjectType == BL_OBJ_TYPE_LOG_CONTAINER){
             if(contFlag){
                 restSize = unCompressedSize - lidx;
-                restData = mxMalloc(restSize);
-                memcpy(restData, unCompressedData+lidx, restSize);
+                if(restSize>0){
+                    restData = mxMalloc(restSize);
+                    memcpy(restData, unCompressedData+lidx, restSize);
+                }
             }
             if(needFree){
                 mxFree(unCompressedData);
@@ -122,24 +123,16 @@ uint8_t blfPeekObject(){
             compressedData = mxMalloc(compressedSize);
             fread(compressedData, compressedSize, 1, fp);
             //
-            unCompressedSize = Container.deflatebuffersize;
-            unCompressedData = mxMalloc(unCompressedSize+restSize);
-            memUncompress(unCompressedData+restSize, unCompressedSize, compressedData, compressedSize, 0);
+            unCompressedSize = Container.deflatebuffersize + restSize;
+            unCompressedData = mxMalloc(unCompressedSize);
+            memUncompress(unCompressedData+restSize, unCompressedSize-restSize, compressedData, compressedSize, 0);
             memcpy(unCompressedData, restData, restSize);
             //
             mxFree(compressedData);
-                
-                #if 0
-                compressedSize = Container.base.mObjectSize - BL_HEADER_CONTAINER_SIZE;
-                compressedData = mxMalloc(compressedSize);
-                fread(compressedData, compressedSize, 1, fp);
-                //
-                unCompressedSize = Container.deflatebuffersize;
-                unCompressedData = mxMalloc(unCompressedSize);
-                memUncompress(unCompressedData, unCompressedSize, compressedData, compressedSize, 0);
-                //
-                mxFree(compressedData);
-                #endif
+            if(restSize>0){
+                mxFree(restData);
+            }
+            //
             needFree = 1;
             lidx = 0;
             peekFlag = 0;
@@ -240,30 +233,9 @@ mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     plhs[3] = mxCreateDoubleMatrix (1,logg.objectCount , mxREAL);
     cantime = mxGetPr(plhs[3]);
 
-    
-
     while(blfPeekObject())
         blfReadObjectSecure();
     
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     #ifdef BLFDEBUG
     mexPrintf("The input string is:  %s\n", filename);
     mexPrintf("The file length is:  %u\n", filelen);
