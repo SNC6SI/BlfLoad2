@@ -26,13 +26,13 @@ typedef struct VBLObjectHeaderBase_t {
   uint32_t  mObjectType;
 } VBLObjectHeaderBase;
 
-typedef struct VBLObjectHeaderBaseLOGG_t {
+typedef struct VBLObjectHeaderContainer_t {
   VBLObjectHeaderBase base;
   uint32_t            compressedflag;
   uint32_t            reserved1;
   uint32_t            deflatebuffersize;
   uint32_t            reserved2;
-} VBLObjectHeaderBaseLOGG;
+} VBLObjectHeaderContainer;
 
 typedef struct VBLObjectHeader_t {
   VBLObjectHeaderBase mBase;
