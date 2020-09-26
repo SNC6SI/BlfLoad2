@@ -19,9 +19,11 @@
 
 static FILE *fp=NULL;
 static long int filelen=0;
-static long int minx=0;
+static long int midx=0;
+static long int lidx=0;
 static LOGG_t logg;
 static uint8_t peekFlag=1;
+static uint8_t contflg=0;
 static uint32_t rcnt=0;
 
 
@@ -36,16 +38,15 @@ uint8_t blfPeekObject(){
 void
 mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
 {
-    (void) plhs;
     char *filename;
     
     if (nrhs != 1) { 
 	    mexErrMsgIdAndTxt( "MATLAB:mxmalloc:invalidNumInputs", 
                 "One input argument required.");
     } 
-    if (nlhs > 1) {
+    if (nlhs != 4) {
 	    mexErrMsgIdAndTxt( "MATLAB:MXMALLOC:maxlhs",
-                "Too many output arguments.");
+                "The number of output arguments should be four.");
     }
     if (!mxIsChar(prhs[0]) || (mxGetM(prhs[0]) != 1 ) )  {
 	    mexErrMsgIdAndTxt( "MATLAB:mxmalloc:invalidInput", 
@@ -61,12 +62,22 @@ mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     fseek(fp, 0, SEEK_SET);
     fread(&logg, sizeof(LOGG_t), 1, fp);
 
-    fclose(fp);
-    mxFree(filename);
+    double *candata, *cantime, *canmsgid, *canchannel;
+    // plhs[0]: candata
+    plhs[0] = mxCreateDoubleMatrix (8,logg.objectCount , mxREAL);
+    candata = mxGetPr(plhs[0]);
     
-    //
-    //
-
+    // plhs[1]: canmsgid
+    plhs[1] = mxCreateDoubleMatrix (1,logg.objectCount , mxREAL);
+    canmsgid = mxGetPr(plhs[1]);
+    
+    // plhs[2]: canchannel
+    plhs[2] = mxCreateDoubleMatrix (1,logg.objectCount , mxREAL);
+    canchannel = mxGetPr(plhs[2]);
+    
+    // plhs[3]: camtime
+    plhs[3] = mxCreateDoubleMatrix (1,logg.objectCount , mxREAL);
+    cantime = mxGetPr(plhs[3]);
 
 
 
@@ -105,4 +116,7 @@ mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     mexPrintf("objectCount:  %u\n", logg.objectCount);
     mexPrintf("appBuild:  %u\n", logg.appBuild);
     #endif
+
+    fclose(fp);
+    mxFree(filename);
 }
