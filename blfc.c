@@ -5,10 +5,33 @@
 
 //#define BLFDEBUG
 
+
+#define BL_OBJ_TYPE_CAN_MESSAGE 1
+#define BL_OBJ_TYPE_LOG_CONTAINER 10
+#define BL_OBJ_TYPE_CAN_MESSAGE2 86
+
+#define BL_OBJ_FLAG_TIME_TEN_MICS 0x00000001 /* 10 micro second timestamp */
+#define BL_OBJ_FLAG_TIME_ONE_NANS 0x00000002 /* 1 nano second timestamp */
+
+#define BL_HEADER_BASE_SIZE 16
+#define BL_HEADER_SIZE 32
+
+
 static FILE *fp=NULL;
 static long int filelen=0;
 static long int minx=0;
 static LOGG_t logg;
+static uint8_t peekFlag=1;
+static uint32_t rcnt=0;
+
+
+uint8_t blfPeekObject(){
+    uint8_t success=1;
+    while(peekFlag){
+
+    }
+}
+
 
 void
 mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
@@ -29,10 +52,8 @@ mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
                 "Input argument must be a string.");
     }
 
-
     filename=mxArrayToString(prhs[0]);
     
-
     fp = fopen(filename, "rb");
     fseek(fp, 0, SEEK_END);
     filelen = ftell(fp);
@@ -40,10 +61,34 @@ mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     fseek(fp, 0, SEEK_SET);
     fread(&logg, sizeof(LOGG_t), 1, fp);
 
-
     fclose(fp);
     mxFree(filename);
     
+    //
+    //
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     #ifdef BLFDEBUG
     mexPrintf("The input string is:  %s\n", filename);
