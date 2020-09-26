@@ -1,0 +1,19 @@
+typedef struct LOGG{
+  uint32_t mSignature;
+  uint32_t mHeaderSize;
+  uint32_t mCRC;
+  uint8_t  appID;
+  uint8_t  dwCompression;
+  uint8_t  appMajor;
+  uint8_t  appMinor;
+  uint64_t fileSize;
+  uint64_t uncompressedFileSize;
+  uint32_t objectCount;
+  uint8_t  appBuild;
+  uint8_t  mReserved1;
+  uint8_t  mReserved2;
+  uint8_t  mReserved3;
+  SYSTEMTIME mMeasurementStartTime;
+  SYSTEMTIME mMeasurementEndTime;
+  uint8_t  mReserved4[72];
+} LOGG_t;
