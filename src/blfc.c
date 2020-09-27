@@ -6,20 +6,6 @@
 
 //#define BLFDEBUG
 
-
-#define BL_OBJ_TYPE_CAN_MESSAGE 1
-#define BL_OBJ_TYPE_LOG_CONTAINER 10
-#define BL_OBJ_TYPE_CAN_MESSAGE2 86
-
-#define BL_OBJ_FLAG_TIME_TEN_MICS 0x00000001 /* 10 micro second timestamp */
-#define BL_OBJ_FLAG_TIME_ONE_NANS 0x00000002 /* 1 nano second timestamp */
-
-#define BL_HEADER_BASE_SIZE 16
-#define BL_HEADER_SIZE 32
-#define BL_HEADER_CONTAINER_SIZE 32
-#define BL_MESSAGE_SIZE 48
-//#define BL_MESSAGE2_SIZE 56
-
 static FILE *fp=NULL;
 static long int filelen=0;
 static long int midx=0;
@@ -156,8 +142,6 @@ uint8_t blfReadObjectSecure(){
         return 0;
     }
     //
-    //fread(&Base, BL_HEADER_BASE_SIZE, 1, fp);
-    //memcpy(void *dest, const void *src, size_t n)
     memcpy(&Base, unCompressedData+lidx, BL_HEADER_BASE_SIZE);
     //
     paddingBytes = Base.mObjectSize & 3;

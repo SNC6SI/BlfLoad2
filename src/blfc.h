@@ -1,3 +1,15 @@
+#define BL_OBJ_TYPE_CAN_MESSAGE 1
+#define BL_OBJ_TYPE_LOG_CONTAINER 10
+#define BL_OBJ_TYPE_CAN_MESSAGE2 86
+
+#define BL_OBJ_FLAG_TIME_TEN_MICS 0x00000001 /* 10 micro second timestamp */
+#define BL_OBJ_FLAG_TIME_ONE_NANS 0x00000002 /* 1 nano second timestamp */
+
+#define BL_HEADER_BASE_SIZE 16
+#define BL_HEADER_SIZE 32
+#define BL_HEADER_CONTAINER_SIZE 32
+#define BL_MESSAGE_SIZE 48
+
 typedef struct LOGG{
   uint32_t mSignature;
   uint32_t mHeaderSize;
