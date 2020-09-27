@@ -191,7 +191,10 @@ mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
 	    mexErrMsgIdAndTxt( "MATLAB:mxmalloc:invalidInput", 
                 "Input argument must be a string.");
     }
-
+    
+    mexPrintf("\n%s %s\n\n", "   BlfLoad2 by Shen, Chenghao", "<snc6si@gmail.com>");
+    mexEvalString("drawnow;");
+    
     blfInit();
 
     filename=mxArrayToString(prhs[0]);
