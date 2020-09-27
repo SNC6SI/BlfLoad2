@@ -122,6 +122,9 @@ uint8_t blfPeekObject(){
             compressedSize = Container.base.mObjectSize - BL_HEADER_CONTAINER_SIZE;
             compressedData = mxMalloc(compressedSize);
             fread(compressedData, compressedSize, 1, fp);
+            if(paddingBytes>0){
+                fseek(fp, paddingBytes, SEEK_CUR);
+            }
             //
             unCompressedSize = Container.deflatebuffersize + restSize;
             unCompressedData = mxMalloc(unCompressedSize);
