@@ -31,6 +31,7 @@ extern int errno;
 static double *candata, *cantime, *canmsgid, *canchannel;
 
 void blfInit(void){
+    fp=NULL;
     filelen = 0;
     midx = 0;
     lidx = 0;
