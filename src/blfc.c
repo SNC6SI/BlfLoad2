@@ -6,32 +6,32 @@
 
 //#define BLFDEBUG
 
-static FILE *fp=NULL;
-static long int filelen=0;
-static long int midx=0;
-static long int lidx=0;
+static FILE *fp = NULL;
+static long int filelen = 0;
+static long int midx = 0;
+static long int lidx = 0;
 static LOGG_t logg;
 static VBLObjectHeaderBase Base;
 static VBLObjectHeaderContainer Container;
 static VBLCANMessage message;
 static uint8_t needFree = 0;
-static uint8_t peekFlag=1;
-static uint8_t contFlag=0;
-static uint32_t rcnt=0;
+static uint8_t peekFlag = 1;
+static uint8_t contFlag = 0;
+static uint32_t rcnt = 0;
 
-static uint8_t *compressedData;
-static uint32_t compressedSize;
-static uint8_t *unCompressedData;
-static uint32_t unCompressedSize;
-static uint8_t *restData;
-static uint32_t restSize;
+static uint8_t *compressedData = NULL;
+static uint32_t compressedSize = 0;
+static uint8_t *unCompressedData = NULL;
+static uint32_t unCompressedSize = 0;
+static uint8_t *restData = NULL;
+static uint32_t restSize = 0;
 
 extern int errno;
 
 static double *candata, *cantime, *canmsgid, *canchannel;
 
 void blfInit(void){
-    fp=NULL;
+    fp = NULL;
     filelen = 0;
     midx = 0;
     lidx = 0;
@@ -39,6 +39,12 @@ void blfInit(void){
     peekFlag = 1;
     contFlag = 0;
     rcnt = 0;
+    compressedData = NULL;
+    compressedSize = 0;
+    unCompressedData = NULL;
+    unCompressedSize = 0;
+    restData = NULL;
+    restSize = 0;
 }
 
 
