@@ -194,7 +194,7 @@ mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
                 "Input argument must be a string.");
     }
     
-    mexPrintf("\n%s %s\n\n", "   BlfLoad2 by Shen, Chenghao", "<snc6si@gmail.com>");
+    mexPrintf("\n%s %s\n\n", "   BlfLoad2 by Shen, Chenghao", "<snc6si@gmail.com>.");
     mexEvalString("drawnow;");
     
     blfInit();
