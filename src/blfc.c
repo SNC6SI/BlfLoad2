@@ -106,9 +106,7 @@ uint8_t blfPeekObject(){
                     memcpy(restData, unCompressedData + lidx, restSize);
                 }
             }
-            if(needFree){
-                mxFree(unCompressedData);
-            }
+            mxFree(unCompressedData);
             fread(&Container, BL_HEADER_CONTAINER_SIZE, 1, fp);
             //
             compressedSize = Container.base.mObjectSize - 
