@@ -4,8 +4,6 @@
 #include "blfc.h"
 #include "zlib.h"
 
-//#define BLFDEBUG
-
 static FILE *fp = NULL;
 static long int filelen = 0;
 static long int midx = 0;
@@ -226,41 +224,24 @@ mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     fseek(fp, 0, SEEK_SET);
     fread(&logg, sizeof(LOGG_t), 1, fp);
 
-    
     // plhs[0]: candata
-    plhs[0] = mxCreateDoubleMatrix (8,logg.objectCount , mxREAL);
+    plhs[0] = mxCreateDoubleMatrix (8,logg.mObjectCount , mxREAL);
     candata = mxGetPr(plhs[0]);
     
     // plhs[1]: canmsgid
-    plhs[1] = mxCreateDoubleMatrix (1,logg.objectCount , mxREAL);
+    plhs[1] = mxCreateDoubleMatrix (1,logg.mObjectCount , mxREAL);
     canmsgid = mxGetPr(plhs[1]);
     
     // plhs[2]: canchannel
-    plhs[2] = mxCreateDoubleMatrix (1,logg.objectCount , mxREAL);
+    plhs[2] = mxCreateDoubleMatrix (1,logg.mObjectCount , mxREAL);
     canchannel = mxGetPr(plhs[2]);
     
     // plhs[3]: camtime
-    plhs[3] = mxCreateDoubleMatrix (1,logg.objectCount , mxREAL);
+    plhs[3] = mxCreateDoubleMatrix (1,logg.mObjectCount , mxREAL);
     cantime = mxGetPr(plhs[3]);
 
     while(blfPeekObject())
         blfReadObjectSecure();
-    
-    #ifdef BLFDEBUG
-    mexPrintf("The input string is:  %s\n", filename);
-    mexPrintf("The file length is:  %u\n", filelen);
-    mexPrintf("mSignature:  %X\n", logg.mSignature);
-    mexPrintf("mHeaderSize:  %u\n", logg.mHeaderSize);
-    mexPrintf("mCRC:  %u\n", logg.mCRC);
-    mexPrintf("appID:  %u\n", logg.appID);
-    mexPrintf("dwCompression:  %u\n", logg.dwCompression);
-    mexPrintf("appMajor:  %u\n", logg.appMajor);
-    mexPrintf("appMinor:  %u\n", logg.appMinor);
-    mexPrintf("fileSize:  %u\n", logg.fileSize);
-    mexPrintf("uncompressedFileSize:  %u\n", logg.uncompressedFileSize);
-    mexPrintf("objectCount:  %u\n", logg.objectCount);
-    mexPrintf("appBuild:  %u\n", logg.appBuild);
-    #endif
 
     mxSetN(plhs[0], rcnt);
     mxSetN(plhs[1], rcnt);
