@@ -26,6 +26,7 @@ static uint32_t unCompressedSize;
 static uint8_t *restData;
 static uint32_t restSize;
 
+extern int errno;
 
 static double *candata, *cantime, *canmsgid, *canchannel;
 
@@ -180,15 +181,15 @@ mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     char *filename;
     
     if (nrhs != 1) { 
-	    mexErrMsgIdAndTxt( "MATLAB:mxmalloc:invalidNumInputs", 
+	    mexErrMsgIdAndTxt( "MATLAB:blfc:invalidNumInputs", 
                 "One input argument required.");
     } 
     if (nlhs != 4) {
-	    mexErrMsgIdAndTxt( "MATLAB:MXMALLOC:maxlhs",
+	    mexErrMsgIdAndTxt( "MATLAB:blfc:maxlhs",
                 "The number of output arguments should be four.");
     }
     if (!mxIsChar(prhs[0]) || (mxGetM(prhs[0]) != 1 ) )  {
-	    mexErrMsgIdAndTxt( "MATLAB:mxmalloc:invalidInput", 
+	    mexErrMsgIdAndTxt( "MATLAB:blfc:invalidInput", 
                 "Input argument must be a string.");
     }
     
@@ -200,6 +201,12 @@ mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     filename=mxArrayToString(prhs[0]);
     
     fp = fopen(filename, "rb");
+    if(fp==NULL){
+        mexErrMsgIdAndTxt( "MATLAB:blfc:fileNotFound", 
+                "%s: %s.",
+                strerror(errno),
+                filename);
+    }
     fseek(fp, 0, SEEK_END);
     filelen = ftell(fp);
 
