@@ -107,7 +107,8 @@ uint8_t blfPeekObject(){
             }
             fread(&Container, BL_HEADER_CONTAINER_SIZE, 1, fp);
             
-            compressedSize = Container.base.mObjectSize - BL_HEADER_CONTAINER_SIZE;
+            compressedSize = Container.base.mObjectSize - 
+                             BL_HEADER_CONTAINER_SIZE;
             compressedData = mxMalloc(compressedSize);
             fread(compressedData, compressedSize, 1, fp);
             if(paddingBytes>0){
@@ -116,7 +117,11 @@ uint8_t blfPeekObject(){
             //
             unCompressedSize = Container.deflatebuffersize + restSize;
             unCompressedData = mxMalloc(unCompressedSize);
-            memUncompress(unCompressedData+restSize, unCompressedSize-restSize, compressedData, compressedSize, 0);
+            memUncompress(unCompressedData+restSize,
+                          unCompressedSize-restSize,
+                          compressedData,
+                          compressedSize,
+                          0);
             memcpy(unCompressedData, restData, restSize);
             //
             mxFree(compressedData);
@@ -163,9 +168,11 @@ uint8_t blfReadObjectSecure(){
             *(canmsgid + rcnt) = (double)message.mID;
             *(canchannel + rcnt) = (double)message.mChannel;
             if(message.mHeader.mObjectFlags==BL_OBJ_FLAG_TIME_ONE_NANS)
-            *(cantime + rcnt) = ((double)message.mHeader.mObjectTimeStamp)/1000000000;
+            *(cantime + rcnt) = 
+                ((double)message.mHeader.mObjectTimeStamp)/1000000000;
             else
-            *(cantime + rcnt) = ((double)message.mHeader.mObjectTimeStamp)/100000;
+            *(cantime + rcnt) = 
+                ((double)message.mHeader.mObjectTimeStamp)/100000;
             rcnt++;
             break;
         default:
@@ -200,7 +207,7 @@ mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     
     blfInit();
 
-    filename=mxArrayToString(prhs[0]);
+    filename = mxArrayToString(prhs[0]);
     
     fp = fopen(filename, "rb");
     if(fp==NULL){
