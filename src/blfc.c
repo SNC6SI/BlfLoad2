@@ -124,10 +124,10 @@ uint8_t blfPeekObject(){
                           compressedData,
                           compressedSize,
                           0);
-            memcpy(unCompressedData, restData, restSize);
             //
             mxFree(compressedData);
-            if(restSize>0){
+            if(restSize > 0){
+                memcpy(unCompressedData, restData, restSize);
                 mxFree(restData);
             }
             //
