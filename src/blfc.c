@@ -101,28 +101,28 @@ uint8_t blfPeekObject(){
         if(Base.mObjectType == BL_OBJ_TYPE_LOG_CONTAINER){
             if(contFlag){
                 restSize = unCompressedSize - lidx;
-                if(restSize>0){
+                if(restSize > 0){
                     restData = mxMalloc(restSize);
-                    memcpy(restData, unCompressedData+lidx, restSize);
+                    memcpy(restData, unCompressedData + lidx, restSize);
                 }
             }
             if(needFree){
                 mxFree(unCompressedData);
             }
             fread(&Container, BL_HEADER_CONTAINER_SIZE, 1, fp);
-            
+            //
             compressedSize = Container.base.mObjectSize - 
                              BL_HEADER_CONTAINER_SIZE;
             compressedData = mxMalloc(compressedSize);
             fread(compressedData, compressedSize, 1, fp);
-            if(paddingBytes>0){
+            if(paddingBytes > 0){
                 fseek(fp, paddingBytes, SEEK_CUR);
             }
             //
             unCompressedSize = Container.deflatebuffersize + restSize;
             unCompressedData = mxMalloc(unCompressedSize);
-            memUncompress(unCompressedData+restSize,
-                          unCompressedSize-restSize,
+            memUncompress(unCompressedData + restSize,
+                          unCompressedSize - restSize,
                           compressedData,
                           compressedSize,
                           0);
