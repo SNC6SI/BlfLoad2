@@ -131,8 +131,11 @@ uint8_t blfPeekObject(){
                 mxFree(restData);
             }
             //
+            restSize = 0;
             lidx = 0;
             peekFlag = 0;
+        }else{
+            fseek(fp, Base.mObjectSize + paddingBytes, SEEK_CUR);
         }
         midx = midx_;
     }
