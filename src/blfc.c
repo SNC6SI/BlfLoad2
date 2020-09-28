@@ -14,7 +14,6 @@ static LOGG_t logg;
 static VBLObjectHeaderBase Base;
 static VBLObjectHeaderContainer Container;
 static VBLCANMessage message;
-static uint8_t needFree = 0;
 static uint8_t peekFlag = 1;
 static uint8_t contFlag = 0;
 static uint32_t rcnt = 0;
@@ -35,7 +34,6 @@ void blfInit(void){
     filelen = 0;
     midx = 0;
     lidx = 0;
-    needFree = 0;
     peekFlag = 1;
     contFlag = 0;
     rcnt = 0;
@@ -135,7 +133,6 @@ uint8_t blfPeekObject(){
                 mxFree(restData);
             }
             //
-            needFree = 1;
             lidx = 0;
             peekFlag = 0;
         }
