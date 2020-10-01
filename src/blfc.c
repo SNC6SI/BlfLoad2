@@ -4,6 +4,7 @@
 #include "blfc.h"
 #include "zlib.h"
 
+static char *filename = NULL;
 static FILE *fp = NULL;
 static long int filelen = 0;
 static long int midx = 0;
@@ -28,6 +29,7 @@ extern int errno;
 static double *candata, *cantime, *canmsgid, *canchannel;
 
 void blfInit(void){
+    filename = NULL;
     fp = NULL;
     filelen = 0;
     midx = 0;
@@ -188,8 +190,6 @@ uint8_t blfReadObjectSecure(){
 void
 mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
 {
-    char *filename;
-    
     if (nrhs != 1) { 
 	    mexErrMsgIdAndTxt( "MATLAB:blfc:invalidNumInputs", 
                 "One input argument required.");
