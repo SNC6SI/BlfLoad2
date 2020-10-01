@@ -4,6 +4,7 @@
 #include "blfi.h"
 
 #define NFIELD_DATE sizeof(date)/sizeof(*date)
+#define NFIELD_INFO sizeof(info)/sizeof(*info)
 
 static char *filename = NULL;
 static FILE *fp = NULL;
@@ -41,7 +42,16 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
                           "Minute",
                           "Second",
                           "Milliseconds"};
+    const char* info[] = {"ApplicationID",
+                          "ApplicationMajor",
+                          "ApplicationMinor",
+                          "ApplicationBuild",
+                          "FileSize",
+                          "UncompressedFileSize",
+                          "ObjectCount",
+                          "DateTime"};
     mxArray* temp_value;
+    mxArray* Sdate;
 
     if (nrhs != 1) { 
 	    mexErrMsgIdAndTxt( "MATLAB:blfi:invalidNumInputs", 
@@ -74,51 +84,77 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     blfStatisticsFromLogg();
     fclose(fp);
 
-    plhs[0] = mxCreateStructMatrix(2, 1, NFIELD_DATE, &date);
+    Sdate = mxCreateStructMatrix(2, 1, NFIELD_DATE, &date);
 
     temp_value = mxCreateDoubleMatrix(1, 1, mxREAL);
     *mxGetPr(temp_value) = (double)pStat.mMeasurementStartTime.wYear;
-    mxSetFieldByNumber(plhs[0], 0, 0, temp_value);
+    mxSetFieldByNumber(Sdate, 0, 0, temp_value);
     temp_value = mxCreateDoubleMatrix(1, 1, mxREAL);
     *mxGetPr(temp_value) = (double)pStat.mMeasurementStartTime.wMonth;
-    mxSetFieldByNumber(plhs[0], 0, 1, temp_value);
+    mxSetFieldByNumber(Sdate, 0, 1, temp_value);
     temp_value = mxCreateDoubleMatrix(1, 1, mxREAL);
     *mxGetPr(temp_value) = (double)pStat.mMeasurementStartTime.wDay;
-    mxSetFieldByNumber(plhs[0], 0, 2, temp_value);
+    mxSetFieldByNumber(Sdate, 0, 2, temp_value);
     temp_value = mxCreateDoubleMatrix(1, 1, mxREAL);
     *mxGetPr(temp_value) = (double)pStat.mMeasurementStartTime.wHour;
-    mxSetFieldByNumber(plhs[0], 0, 3, temp_value);
+    mxSetFieldByNumber(Sdate, 0, 3, temp_value);
     temp_value = mxCreateDoubleMatrix(1, 1, mxREAL);
     *mxGetPr(temp_value) = (double)pStat.mMeasurementStartTime.wMinute;
-    mxSetFieldByNumber(plhs[0], 0, 4, temp_value);
+    mxSetFieldByNumber(Sdate, 0, 4, temp_value);
     temp_value = mxCreateDoubleMatrix(1, 1, mxREAL);
     *mxGetPr(temp_value) = (double)pStat.mMeasurementStartTime.wSecond;
-    mxSetFieldByNumber(plhs[0], 0, 5, temp_value);
+    mxSetFieldByNumber(Sdate, 0, 5, temp_value);
     temp_value = mxCreateDoubleMatrix(1, 1, mxREAL);
     *mxGetPr(temp_value) = (double)pStat.mMeasurementStartTime.wMilliseconds;
-    mxSetFieldByNumber(plhs[0], 0, 6, temp_value);
+    mxSetFieldByNumber(Sdate, 0, 6, temp_value);
 
     temp_value = mxCreateDoubleMatrix(1, 1, mxREAL);
     *mxGetPr(temp_value) = (double)pStat.mLastObjectTime.wYear;
-    mxSetFieldByNumber(plhs[0], 1, 0, temp_value);
+    mxSetFieldByNumber(Sdate, 1, 0, temp_value);
     temp_value = mxCreateDoubleMatrix(1, 1, mxREAL);
     *mxGetPr(temp_value) = (double)pStat.mLastObjectTime.wMonth;
-    mxSetFieldByNumber(plhs[0], 1, 1, temp_value);
+    mxSetFieldByNumber(Sdate, 1, 1, temp_value);
     temp_value = mxCreateDoubleMatrix(1, 1, mxREAL);
     *mxGetPr(temp_value) = (double)pStat.mLastObjectTime.wDay;
-    mxSetFieldByNumber(plhs[0], 1, 2, temp_value);
+    mxSetFieldByNumber(Sdate, 1, 2, temp_value);
     temp_value = mxCreateDoubleMatrix(1, 1, mxREAL);
     *mxGetPr(temp_value) = (double)pStat.mLastObjectTime.wHour;
-    mxSetFieldByNumber(plhs[0], 1, 3, temp_value);
+    mxSetFieldByNumber(Sdate, 1, 3, temp_value);
     temp_value = mxCreateDoubleMatrix(1, 1, mxREAL);
     *mxGetPr(temp_value) = (double)pStat.mLastObjectTime.wMinute;
-    mxSetFieldByNumber(plhs[0], 1, 4, temp_value);
+    mxSetFieldByNumber(Sdate, 1, 4, temp_value);
     temp_value = mxCreateDoubleMatrix(1, 1, mxREAL);
     *mxGetPr(temp_value) = (double)pStat.mLastObjectTime.wSecond;
-    mxSetFieldByNumber(plhs[0], 1, 5, temp_value);
+    mxSetFieldByNumber(Sdate, 1, 5, temp_value);
     temp_value = mxCreateDoubleMatrix(1, 1, mxREAL);
     *mxGetPr(temp_value) = (double)pStat.mLastObjectTime.wMilliseconds;
-    mxSetFieldByNumber(plhs[0], 1, 6, temp_value);
+    mxSetFieldByNumber(Sdate, 1, 6, temp_value);
+
+    plhs[0] = mxCreateStructMatrix(1, 1, NFIELD_INFO, &info);
+
+    temp_value = mxCreateDoubleMatrix(1, 1, mxREAL);
+    *mxGetPr(temp_value) = (double)pStat.mApplicationID;
+    mxSetFieldByNumber(plhs[0], 0, 0, temp_value);
+    temp_value = mxCreateDoubleMatrix(1, 1, mxREAL);
+    *mxGetPr(temp_value) = (double)pStat.mApplicationMajor;
+    mxSetFieldByNumber(plhs[0], 0, 1, temp_value);
+    temp_value = mxCreateDoubleMatrix(1, 1, mxREAL);
+    *mxGetPr(temp_value) = (double)pStat.mApplicationMinor;
+    mxSetFieldByNumber(plhs[0], 0, 2, temp_value);
+    temp_value = mxCreateDoubleMatrix(1, 1, mxREAL);
+    *mxGetPr(temp_value) = (double)pStat.mApplicationBuild;
+    mxSetFieldByNumber(plhs[0], 0, 3, temp_value);
+    temp_value = mxCreateDoubleMatrix(1, 1, mxREAL);
+    *mxGetPr(temp_value) = (double)pStat.mFileSize;
+    mxSetFieldByNumber(plhs[0], 0, 4, temp_value);
+    temp_value = mxCreateDoubleMatrix(1, 1, mxREAL);
+    *mxGetPr(temp_value) = (double)pStat.mUncompressedFileSize;
+    mxSetFieldByNumber(plhs[0], 0, 5, temp_value);
+    temp_value = mxCreateDoubleMatrix(1, 1, mxREAL);
+    *mxGetPr(temp_value) = (double)pStat.mObjectCount;
+    mxSetFieldByNumber(plhs[0], 0, 6, temp_value);
+
+    mxSetFieldByNumber(plhs[0], 0, 7, Sdate);
 
     mxFree(filename);
 }
