@@ -213,7 +213,7 @@ mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     }
     if (!mxIsChar(prhs[0]) || (mxGetM(prhs[0]) != 1 ) )  {
 	    mexErrMsgIdAndTxt( "MATLAB:blfc:invalidInput", 
-                "Input argument must be a string.");
+                "The first argument must be a string.");
     }
     
     mexPrintf("\n\t%s %s\n\n",
