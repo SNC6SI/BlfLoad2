@@ -13,6 +13,7 @@ static LOGG_t logg;
 static VBLObjectHeaderBase Base;
 static VBLObjectHeaderContainer Container;
 static VBLCANMessage message;
+static VBLFileStatisticsEx pStatistics;
 static uint8_t peekFlag = 1;
 static uint8_t contFlag = 0;
 static uint32_t rcnt = 0;
@@ -43,6 +44,18 @@ void blfInit(void){
     unCompressedSize = 0;
     restData = NULL;
     restSize = 0;
+}
+
+void blfStatisticsFromLogg(void){
+    pStatistics.mApplicationID = logg.mApplicationID;
+    pStatistics.mApplicationMajor = logg.mApplicationMajor;
+    pStatistics.mApplicationMinor = logg.mApplicationMinor;
+    pStatistics.mApplicationBuild = logg.mApplicationBuild;
+    pStatistics.mFileSize = logg.mFileSize;
+    pStatistics.mUncompressedFileSize = logg.mUncompressedFileSize;
+    pStatistics.mObjectCount = logg.mObjectCount;
+    pStatistics.mMeasurementStartTime = logg.mMeasurementStartTime;
+    pStatistics.mLastObjectTime = logg.mLastObjectTime;
 }
 
 
@@ -224,6 +237,7 @@ mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     fseek(fp, 0, SEEK_SET);
     fread(&logg, sizeof(LOGG_t), 1, fp);
 
+    blfStatisticsFromLogg();
     // plhs[0]: candata
     plhs[0] = mxCreateDoubleMatrix (8,logg.mObjectCount , mxREAL);
     candata = mxGetPr(plhs[0]);
