@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <windows.h>
 #include "mex.h"
-#include "blfc.h"
+#include "blfr.h"
 #include "zlib.h"
 
 static char *filename = NULL;
