@@ -19,6 +19,7 @@
 #define BL_AppBuild 1
 
 #define BL_CHUNK 0x20000
+#define BL_ZLIB_LEVEL 9
 
 
 typedef struct LOGG{

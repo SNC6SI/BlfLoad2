@@ -6,24 +6,29 @@
 
 static char *filename = NULL;
 static FILE *fp = NULL;
-static long int midx = 0;
-static long int lidx = 0;
 static LOGG_t logg;
-//static VBLObjectHeaderBase Base;
+
+static uint8_t contFlag = 0;
 static VBLObjectHeaderContainer container;
 static VBLCANMessage message;
-static uint32_t rcnt = 0;
 
-static uint8_t *compressedData = NULL;
+static uint32_t rcnt = 0;
+static uint32_t objectCounts[4] = {0, 0, 0, 0};
+
+static uint8_t compressedData[BL_CHUNK];
 static uint32_t compressedSize = 0;
-static uint8_t *unCompressedData = NULL;
+static uint8_t unCompressedData[BL_CHUNK];
 static uint32_t unCompressedSize = 0;
-static uint8_t *restData = NULL;
+static uint32_t thisSize = 0;
 static uint32_t restSize = 0;
+static uint32_t paddingBytes = 0;
+
+static uint8_t i;
 
 static double *candata, *cantime, *canmsgid, *canchannel;
 
 extern int errno;
+
 
 void loggInit(void){
     logg.mSignature = BL_LOGG_SIGNATURE;
@@ -34,6 +39,10 @@ void loggInit(void){
     logg.mApplicationMajor = BL_Major;
     logg.mApplicationMinor = BL_Minor;
     logg.mApplicationBuild = BL_AppBuild;
+    //
+    logg.mFileSize = BL_LOGG_SIZE;
+    logg.mUncompressedFileSize = BL_LOGG_SIZE;
+    logg.mObjectCount = 0;
 }
 
 
@@ -49,12 +58,14 @@ void messageInit(void){
     message.mDLC = 8;
 }
 
+
 void containerInit(void){
     container.mBase.mSignature = BL_OBJ_SIGNATURE;
     container.mBase.mHeaderSize = BL_HEADER_BASE_SIZE;
     container.mBase.mHeaderVersion = 1;
     container.mBase.mObjectType = BL_OBJ_TYPE_LOG_CONTAINER;
-    //container.mBase.mObjectSize = ???;
+    //
+    container.mCompressedflag = 2;
 }
 
 
@@ -71,60 +82,98 @@ void blfInit(void){
     memset(&container, 0, BL_HEADER_CONTAINER_SIZE);
     containerInit();
     //
+    contFlag = 0;
     rcnt = 0;
-    compressedData = NULL;
+    objectCounts[0] = 0;
+    objectCounts[1] = 0;
+    objectCounts[2] = 0;
+    objectCounts[3] = 0;
+    //
     compressedSize = 0;
-    unCompressedData = NULL;
     unCompressedSize = 0;
-    restData = NULL;
+    thisSize = 0;
     restSize = 0;
+    paddingBytes = 0;
 }
 
 
-int memUncompress(uint8_t  *next_out,
-     uint32_t  avail_out,
-     uint8_t  *next_in,
-     uint32_t  avail_in,
-     uint32_t *total_out_ptr)
-{
-  int zres;
-  z_stream stream;
-
-  stream.next_in = next_in;
-  stream.avail_in = avail_in;
-  stream.next_out = next_out;
-  stream.avail_out = avail_out;
-  stream.total_out = 0;
-  stream.state = NULL;
-  stream.zalloc = NULL;
-  stream.zfree = NULL;
-
-  zres = inflateInit_(&stream, ZLIB_VERSION, sizeof(stream));
-  if(zres == Z_OK) zres = inflate(&stream, Z_FINISH);
-  if(zres == Z_STREAM_END) zres = Z_OK;
-  if(zres == Z_OK) {
-    inflateEnd(&stream);
-    if(total_out_ptr != NULL) {
-      *total_out_ptr = stream.total_out;
+void blfWriteObjectInternal(void){
+    compressedSize = BL_CHUNK;
+    compress(compressedData, &compressedSize, unCompressedData, unCompressedSize);
+    container.mBase.mObjectSize = BL_HEADER_CONTAINER_SIZE + compressedSize;
+    container.mDeflatebuffersize = unCompressedSize;
+    //
+    fwrite(&container, BL_HEADER_CONTAINER_SIZE, 1, fp);
+    fwrite(compressedData, compressedSize, 1, fp);
+    paddingBytes = compressedSize & 3;
+    if(paddingBytes > 0){
+        fseek(fp, paddingBytes, SEEK_CUR);
     }
-  }
-  return zres == Z_OK;
+    //
+    logg.mFileSize += BL_HEADER_CONTAINER_SIZE + compressedSize + paddingBytes;
+    logg.mUncompressedFileSize += BL_HEADER_CONTAINER_SIZE + unCompressedSize;
+    //
+    compressedSize = 0;
+    unCompressedSize = 0;
 }
 
+
+uint8_t blfWriteObject(void){
+    //int ZEXPORT compress2 (dest, destLen, source, sourceLen, level)
+    //Bytef *dest;
+    //uLongf *destLen;
+    //const Bytef *source;
+    //uLong sourceLen;
+    //int level;
+    while(rcnt < objectCounts[0]){
+        if(contFlag){
+            memcpy(((uint8_t *)unCompressedData) + unCompressedSize, &message + thisSize, restSize);
+            contFlag = 0;
+            rcnt++;
+        }else{
+            message.mHeader.mObjectTimeStamp = (uint64_t)((*(cantime + rcnt))*1000000000);
+            message.mChannel = (uint16_t)(*(canchannel + rcnt));
+            message.mID = (uint32_t)(*(canmsgid + rcnt));
+            for(i=0;i<8;i++){
+                message.mData[i] = (uint8_t)(*(candata + rcnt*8 +i));
+            }
+            if(unCompressedSize + BL_MESSAGE_SIZE <= BL_CHUNK){
+                memcpy(((uint8_t *)unCompressedData) + unCompressedSize, &message, BL_MESSAGE_SIZE);
+                unCompressedSize += BL_MESSAGE_SIZE;
+                rcnt++;
+            }else{
+                thisSize = BL_CHUNK - unCompressedSize;
+                restSize = unCompressedSize + BL_MESSAGE_SIZE - BL_CHUNK;
+                if(thisSize==0){
+                    contFlag = 1;
+                    continue;
+                }
+                memcpy(((uint8_t *)unCompressedData) + unCompressedSize, &message, thisSize);
+                contFlag = 1;
+            }
+        }
+        if(contFlag){
+            blfWriteObjectInternal();
+        }
+    }
+    if(unCompressedSize > 0){
+        blfWriteObjectInternal();
+    }
+}
 
 void
 mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
 {
     if (nrhs != 5) { 
-	    mexErrMsgIdAndTxt( "MATLAB:blfc:invalidNumInputs", 
+      mexErrMsgIdAndTxt( "MATLAB:blfc:invalidNumInputs", 
                 "Five inputs argument required.");
     } 
     if (nlhs > 1) {
-	    mexErrMsgIdAndTxt( "MATLAB:blfc:maxlhs",
+      mexErrMsgIdAndTxt( "MATLAB:blfc:maxlhs",
                 "The number of output arguments should be zero or one.");
     }
     if (!mxIsChar(prhs[0]) || (mxGetM(prhs[0]) != 1 ) )  {
-	    mexErrMsgIdAndTxt( "MATLAB:blfc:invalidInput", 
+      mexErrMsgIdAndTxt( "MATLAB:blfc:invalidInput", 
                 "The first argument must be a string.");
     }
     
@@ -135,7 +184,18 @@ mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     blfInit();
 
     filename = mxArrayToString(prhs[0]);
-    
+
+
+    candata = mxGetPr(prhs[1]);
+    canmsgid = mxGetPr(prhs[2]);
+    canchannel = mxGetPr(prhs[3]);
+    cantime = mxGetPr(prhs[4]);
+
+    objectCounts[0] = (uint32_t)mxGetN(prhs[1]);
+    objectCounts[1] = (uint32_t)mxGetN(prhs[2]);
+    objectCounts[2] = (uint32_t)mxGetN(prhs[3]);
+    objectCounts[3] = (uint32_t)mxGetN(prhs[4]);
+
     fp = fopen(filename, "wb");
     if(fp==NULL){
         mexErrMsgIdAndTxt( "MATLAB:blfc:fileCannotWrite", 
@@ -144,10 +204,12 @@ mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
                 filename);
     }
 
-    candata = mxGetPr(prhs[1]);
-    cantime = mxGetPr(prhs[2]);
-    canmsgid = mxGetPr(prhs[3]);
-    canchannel = mxGetPr(prhs[4]);
+    fseek(fp, BL_LOGG_SIZE, SEEK_SET);
+    blfWriteObject();
+
+    logg.mObjectCount = rcnt;
+    fseek(fp, 0, SEEK_SET);
+    fwrite(&logg, BL_LOGG_SIZE, 1, fp);
 
     fclose(fp);
     mxFree(filename);
