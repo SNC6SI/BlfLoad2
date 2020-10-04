@@ -21,7 +21,8 @@ static uint8_t unCompressedData[BL_CHUNK];
 static uint32_t unCompressedSize = 0;
 static uint32_t thisSize = 0;
 static uint32_t restSize = 0;
-static uint32_t paddingBytes = 0;
+static uint8_t paddingBytes[3] = {0, 0, 0};
+static uint32_t paddingSize = 0;
 
 static uint8_t i;
 
@@ -93,7 +94,7 @@ void blfInit(void){
     unCompressedSize = 0;
     thisSize = 0;
     restSize = 0;
-    paddingBytes = 0;
+    paddingSize = 0;
 }
 
 
@@ -105,12 +106,12 @@ void blfWriteObjectInternal(void){
     //
     fwrite(&container, BL_HEADER_CONTAINER_SIZE, 1, fp);
     fwrite(compressedData, compressedSize, 1, fp);
-    paddingBytes = compressedSize & 3;
-    if(paddingBytes > 0){
-        fseek(fp, paddingBytes, SEEK_CUR);
+    paddingSize = compressedSize & 3;
+    if(paddingSize > 0){
+        fwrite(paddingBytes, paddingSize, 1, fp);
     }
     //
-    logg.mFileSize += BL_HEADER_CONTAINER_SIZE + compressedSize + paddingBytes;
+    logg.mFileSize += BL_HEADER_CONTAINER_SIZE + compressedSize + paddingSize;
     logg.mUncompressedFileSize += BL_HEADER_CONTAINER_SIZE + unCompressedSize;
     //
     compressedSize = 0;
