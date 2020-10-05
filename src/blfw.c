@@ -77,7 +77,7 @@ void blfInit(void){
     memset(&logg, 0, BL_LOGG_SIZE);
     loggInit();
     //
-    memset(&logg, 0, BL_MESSAGE_SIZE);
+    memset(&message, 0, BL_MESSAGE_SIZE);
     messageInit();
     //
     memset(&container, 0, BL_HEADER_CONTAINER_SIZE);
