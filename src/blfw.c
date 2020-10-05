@@ -123,6 +123,7 @@ uint8_t blfWriteObject(void){
     while(rcnt < objectCounts[0]){
         if(contFlag){
             memcpy(((uint8_t *)unCompressedData) + unCompressedSize, ((uint8_t *)&message) + thisSize, restSize);
+            unCompressedSize += restSize;
             contFlag = 0;
             rcnt++;
         }else{
