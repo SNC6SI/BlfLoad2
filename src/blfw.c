@@ -114,7 +114,6 @@ void blfWriteObjectInternal(void){
     logg.mFileSize += BL_HEADER_CONTAINER_SIZE + compressedSize + paddingSize;
     logg.mUncompressedFileSize += BL_HEADER_CONTAINER_SIZE + unCompressedSize;
     //
-    compressedSize = 0;
     unCompressedSize = 0;
 }
 
