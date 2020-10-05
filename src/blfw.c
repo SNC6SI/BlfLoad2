@@ -139,11 +139,10 @@ uint8_t blfWriteObject(void){
             }else{
                 thisSize = BL_CHUNK - unCompressedSize;
                 restSize = unCompressedSize + BL_MESSAGE_SIZE - BL_CHUNK;
-                if(thisSize==0){
-                    contFlag = 1;
-                    continue;
+                if(thisSize!=0){
+                    memcpy(((uint8_t *)unCompressedData) + unCompressedSize, &message, thisSize);
+                    unCompressedSize += thisSize;
                 }
-                memcpy(((uint8_t *)unCompressedData) + unCompressedSize, &message, thisSize);
                 contFlag = 1;
             }
         }
