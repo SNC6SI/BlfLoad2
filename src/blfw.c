@@ -120,12 +120,6 @@ void blfWriteObjectInternal(void){
 
 
 uint8_t blfWriteObject(void){
-    //int ZEXPORT compress2 (dest, destLen, source, sourceLen, level)
-    //Bytef *dest;
-    //uLongf *destLen;
-    //const Bytef *source;
-    //uLong sourceLen;
-    //int level;
     while(rcnt < objectCounts[0]){
         if(contFlag){
             memcpy(((uint8_t *)unCompressedData) + unCompressedSize, &message + thisSize, restSize);
@@ -157,10 +151,12 @@ uint8_t blfWriteObject(void){
             blfWriteObjectInternal();
         }
     }
+    //
     if(unCompressedSize > 0){
         blfWriteObjectInternal();
     }
 }
+
 
 void
 mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
@@ -185,7 +181,6 @@ mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     blfInit();
 
     filename = mxArrayToString(prhs[0]);
-
 
     candata = mxGetPr(prhs[1]);
     canmsgid = mxGetPr(prhs[2]);
