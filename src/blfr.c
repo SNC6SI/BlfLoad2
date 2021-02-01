@@ -86,6 +86,7 @@ int memUncompress(uint8_t  *next_out,
       *total_out_ptr = stream.total_out;
     }
   }
+  //mexPrintf("zres: %i\n",zres);
   return zres == Z_OK;
 }
 
@@ -132,11 +133,11 @@ uint8_t blfPeekObject(){
             //
             unCompressedSize = Container.deflatebuffersize + restSize;
             unCompressedData = mxMalloc(unCompressedSize);
-            memUncompress(unCompressedData + restSize,
-                          unCompressedSize - restSize,
-                          compressedData,
-                          compressedSize,
-                          0);
+            success = memUncompress(unCompressedData + restSize,
+                                    unCompressedSize - restSize,
+                                    compressedData,
+                                    compressedSize,
+                                    0);
             //
             mxFree(compressedData);
             if(restSize > 0){
@@ -238,6 +239,9 @@ mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     fread(&logg, sizeof(LOGG_t), 1, fp);
 
     blfStatisticsFromLogg();
+    if(logg.mObjectCount==0){
+        logg.mObjectCount = (uint32_t)(filelen/DEFAULT_CONTAINER_FACTOR);
+    }
     // plhs[0]: candata
     plhs[0] = mxCreateDoubleMatrix (8,logg.mObjectCount , mxREAL);
     candata = mxGetPr(plhs[0]);

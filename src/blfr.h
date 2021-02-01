@@ -10,6 +10,8 @@
 #define BL_HEADER_CONTAINER_SIZE 32
 #define BL_MESSAGE_SIZE 48
 
+#define DEFAULT_CONTAINER_FACTOR 8
+
 typedef struct LOGG{
   uint32_t mSignature;
   uint32_t mHeaderSize;
