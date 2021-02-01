@@ -13,6 +13,8 @@ static LOGG_t logg;
 static VBLObjectHeaderBase Base;
 static VBLObjectHeaderContainer Container;
 static VBLCANMessage message;
+static VBLCANErrorFrameExt errorframe;
+static uint8_t errfrm_flg;
 static VBLFileStatisticsEx pStatistics;
 static uint8_t peekFlag = 1;
 static uint8_t contFlag = 0;
@@ -44,6 +46,7 @@ void blfInit(void){
     unCompressedSize = 0;
     restData = NULL;
     restSize = 0;
+    errfrm_flg = 0;
 }
 
 void blfStatisticsFromLogg(void){
@@ -192,6 +195,53 @@ uint8_t blfReadObjectSecure(){
                 ((double)message.mHeader.mObjectTimeStamp)/100000;
             rcnt++;
             break;
+        case BL_OBJ_TYPE_CAN_ERROR_EXT:
+            memcpy(&errorframe, unCompressedData+lidx, BL_ERROREXT_SIZE);
+            // mexPrintf("%s\t%u\n", "mObjectType", errorframe.mHeader.mBase.mObjectType);
+            // mexPrintf("%s\t%u\n", "mObjectSize", errorframe.mHeader.mBase.mObjectSize);
+            // mexPrintf("%s\t%f\n", "mObjectTimeStamp", ((double)errorframe.mHeader.mObjectTimeStamp)/1000000000);
+            // mexPrintf("%s\t%u\n", "mChannel", errorframe.mChannel);
+            // mexPrintf("%s\t%u\n", "mLength", errorframe.mLength);
+            if(!errfrm_flg){
+                mexPrintf("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
+                    "mObjectTimeStamp",
+                    "mObjectType",
+                    "mObjectSize",
+                    "mChannel",
+                    "mLength",
+                    "mFlags",
+                    "mECC",
+                    "mPosition",
+                    "mDLC",
+                    "mFrameLengthInNS",
+                    "mID",
+                    "mFlagsExt",
+                    "mData[8]");
+                errfrm_flg = 1;
+            }
+            mexPrintf("%f\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u %u %u %u %u %u %u %u\n",
+                    ((double)errorframe.mHeader.mObjectTimeStamp)/1000000000,
+                    errorframe.mHeader.mBase.mObjectType,
+                    errorframe.mHeader.mBase.mObjectSize,
+                    errorframe.mChannel,
+                    errorframe.mLength,
+                    errorframe.mFlags,
+                    errorframe.mECC,
+                    errorframe.mPosition,
+                    errorframe.mDLC,
+                    errorframe.mFrameLengthInNS,
+                    errorframe.mID,
+                    errorframe.mFlagsExt,
+                    errorframe.mData[0],
+                    errorframe.mData[1],
+                    errorframe.mData[2],
+                    errorframe.mData[3],
+                    errorframe.mData[4],
+                    errorframe.mData[5],
+                    errorframe.mData[6],
+                    errorframe.mData[7]);
+            
+            
         default:
             break;
     }
