@@ -13,6 +13,7 @@ static LOGG_t logg;
 static VBLObjectHeaderBase Base;
 static VBLObjectHeaderContainer Container;
 static VBLCANMessage message;
+static VBLCANFDMessage64 messageFD;
 static VBLFileStatisticsEx pStatistics;
 static uint8_t peekFlag = 1;
 static uint8_t contFlag = 0;
@@ -178,6 +179,7 @@ uint8_t blfReadObjectSecure(){
     }
     //
     contFlag = 0;
+    //mexPrintf("%u\n",Base.mObjectType);
     switch (Base.mObjectType){
         case BL_OBJ_TYPE_CAN_MESSAGE:
         case BL_OBJ_TYPE_CAN_MESSAGE2:
@@ -192,6 +194,31 @@ uint8_t blfReadObjectSecure(){
             *(cantime + rcnt) = 
                 ((double)message.mHeader.mObjectTimeStamp)/100000;
             rcnt++;
+            break;
+        case BL_OBJ_TYPE_CAN_FD_MESSAGE_64:
+            memcpy(&messageFD, unCompressedData+lidx, Base.mObjectSize);
+            mexPrintf("%X ",messageFD.mHeader.mBase.mSignature);
+            mexPrintf("%u ",messageFD.mHeader.mBase.mObjectSize);
+            mexPrintf("%f ",((double)messageFD.mHeader.mObjectTimeStamp)/1000000000);
+            
+            mexPrintf("%u ",messageFD.mChannel);
+            mexPrintf("%u ",messageFD.mDLC);
+            mexPrintf("%u ",messageFD.mValidDataBytes);
+            mexPrintf("%u ",messageFD.mTxCount);
+            mexPrintf("%X ",messageFD.mID);
+            mexPrintf("%u ",messageFD.mFrameLength);
+
+            mexPrintf("%u ",messageFD.mFlags);
+            mexPrintf("%u ",messageFD.mBtrCfgArb);
+            mexPrintf("%u ",messageFD.mBtrCfgData);
+            mexPrintf("%u ",messageFD.mTimeOffsetBrsNs);
+            mexPrintf("%u ",messageFD.mTimeOffsetCrcDelNs);
+            mexPrintf("%u ",messageFD.mBitCount);
+            mexPrintf("%u ",messageFD.mDir);
+            mexPrintf("%u ",messageFD.mExtDataOffset);
+            mexPrintf("%u ",messageFD.mCRC);
+            for(i=0;i<messageFD.mValidDataBytes;i++) mexPrintf("%u ",messageFD.mData[i]);
+            mexPrintf("\n");
             break;
         default:
             break;
@@ -268,4 +295,23 @@ mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
 
     fclose(fp);
     mxFree(filename);
+
+    mexPrintf("BL_MESSAGEFD64_SIZE: %u\n",BL_MESSAGEFD64_SIZE);
+    #if 0
+    mexPrintf("BL_MESSAGEFD_SIZE: %u\n",BL_MESSAGEFD_SIZE);
+    mexPrintf("mBase: %p\n",&messageFD.mHeader.mBase);
+    mexPrintf("mObjectFlags: %p\n",&messageFD.mHeader.mObjectFlags);
+    mexPrintf("mChannel: %p\n",&messageFD.mChannel);
+    mexPrintf("mFlags: %p\n",&messageFD.mFlags);
+    mexPrintf("mDLC: %p\n",&messageFD.mDLC);
+    mexPrintf("mID: %p\n",&messageFD.mID);
+    mexPrintf("mFrameLength: %p\n",&messageFD.mFrameLength);
+    mexPrintf("mArbBitCount: %p\n",&messageFD.mArbBitCount);
+    mexPrintf("mCANFDFlags: %p\n",&messageFD.mCANFDFlags);
+    mexPrintf("mValidDataBytes: %p\n",&messageFD.mValidDataBytes);
+    mexPrintf("mReserved1: %p\n",&messageFD.mReserved1);
+    mexPrintf("mReserved2: %p\n",&messageFD.mReserved2);
+    mexPrintf("mData[0]: %p\n",&messageFD.mData[0]);
+    mexPrintf("mData[63]: %p\n",&messageFD.mData[63]);
+    #endif
 }
